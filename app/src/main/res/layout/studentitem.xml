@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#fff"
+    android:id="@+id/studentDetails"
+    android:layout_marginTop="20dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+
+       <!-- <ImageView
+            android:id="@+id/studentPic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginStart="@dimen/activity_horizontal_margin"
+            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+            android:contentDescription="Icon" /> -->
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/studentImg"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginStart="30dp"
+            android:src="@drawable/background_main"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            />
+
+        <TextView
+            android:id="@+id/studentName"
+            android:fontFamily="@font/corporativemedium"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:text="Student Name"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toRightOf="@id/studentImg"
+            android:layout_marginStart="30dp"
+            android:textColor="#000"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:textStyle="bold"
+            android:gravity="center_horizontal"
+            android:textSize="20sp"/>
+
+    <TextView
+        android:id="@+id/studentUID"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:fontFamily="@font/corporativemedium"
+        android:gravity="center_vertical"
+        android:text="19bca1111"
+        android:textColor="#000"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/studentName"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
