@@ -57,11 +57,6 @@ before_script:
   - export ANDROID_NDK_HOME=$(dirname $HOME/android-ndk/android-ndk-*/ndk-build)
   - export OPENCV_ANDROID_SDK=$HOME/opencv-sdk/OpenCV-android-sdk
 
-
-
-script:
-  - ./gradlew --no-daemon build
-
 before_deploy:
   # Clean the project
   - ./gradlew --no-daemon clean
