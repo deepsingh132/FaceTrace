@@ -42,6 +42,7 @@ android:
 before_install:
   # Accept the licenses needed for OpenCV and this project
   - yes | sdkmanager "platforms;android-27" "platforms;android-28"
+  - chmod +x gradlew
 
 before_script:
   # Download Android NDK, OpenCV Android SDK
@@ -52,7 +53,9 @@ before_script:
   # Unzip the zip files into their directories
   - unzip -qq -n $HOME/zip-cache/android-ndk.zip -d $HOME/android-ndk
   - unzip -qq -n $HOME/zip-cache/opencv-sdk.zip -d $HOME/opencv-sdk
-
+  
+  
+  
   # Set environmental variables
   - export ANDROID_NDK_HOME=$(dirname $HOME/android-ndk/android-ndk-*/ndk-build)
   - export OPENCV_ANDROID_SDK=$HOME/opencv-sdk/OpenCV-android-sdk
