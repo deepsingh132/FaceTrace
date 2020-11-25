@@ -7,7 +7,7 @@
 
 The code is released under the GNU General Public License.
 _________
-[![Build Status](https://travis-ci.com/github/deepsingh132/FaceAttend.svg?branch=master)](https://travis-ci.com/github/deepsingh132/FaceAttend)
+[![Build Status](https://travis-ci.com/deepsingh132/FaceAttend.svg?branch=master)](https://travis-ci.com/github/deepsingh132/FaceAttend)
 
 This project demonstrates how to use advanced face recognition and face detection models such as facenet and google's mlkit to identify faces and mark attendace on an Android device.
 
