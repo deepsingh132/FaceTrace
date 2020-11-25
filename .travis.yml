@@ -1,100 +1,24 @@
 language: android
-
-sudo: required
-
-jdk: oraclejdk8
-
-before_cache:
-  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
-  - rm -rf $HOME/.gradle/caches/*/plugin-resolution/
-
-cache:
-  directories:
-    # Zip files cache
-    - $HOME/zip-cache/
-
-    # Android NDK, OpenCV SDK and Eigen
-    - $HOME/android-ndk/
-    - $HOME/opencv-sdk/
-
-    # Gradle dependencies
-    - $HOME/.gradle/caches/
-    - $HOME/.gradle/wrapper/
-
-    # Android build cache (see http://tools.android.com/tech-docs/build-cache)
-    - $HOME/.android/build-cache/
-
+dist: trusty
 android:
   components:
-    # Use the latest revision of Android SDK Tools
+    # Uncomment the lines below if you want to
+    # use the latest revision of Android SDK Tools
     - tools
     - platform-tools
 
     # The BuildTools version used by your project
-    - build-tools-28.0.3
+    #- build-tools-26.0.2
 
     # The SDK version used to compile your project
-    - android-28
+    #- android-26
 
     # Additional components
+    - extra-google-google_play_services
+    - extra-google-m2repository
     - extra-android-m2repository
 
-before_install:
-  # Accept the licenses needed for OpenCV and this project
-  - yes | sdkmanager "platforms;android-27" "platforms;android-28"
-  - chmod +x gradlew
-
-before_script:
-  # Download Android NDK, OpenCV Android SDK
-  - if test ! -e $HOME/zip-cache/android-ndk.zip ; then wget https://dl.google.com/android/repository/android-ndk-r18-linux-x86_64.zip -O $HOME/zip-cache/android-ndk.zip ; fi
-  - if test ! -e $HOME/zip-cache/opencv-sdk.zip ; then wget https://github.com/opencv/opencv/releases/download/3.4.1/opencv-3.4.1-android-sdk.zip -O $HOME/zip-cache/opencv-sdk.zip ; fi
-
-
-  # Unzip the zip files into their directories
-  - unzip -qq -n $HOME/zip-cache/android-ndk.zip -d $HOME/android-ndk
-  - unzip -qq -n $HOME/zip-cache/opencv-sdk.zip -d $HOME/opencv-sdk
-  
-  
-  
-  # Set environmental variables
-  - export ANDROID_NDK_HOME=$(dirname $HOME/android-ndk/android-ndk-*/ndk-build)
-  - export OPENCV_ANDROID_SDK=$HOME/opencv-sdk/OpenCV-android-sdk
-
-before_deploy:
-  # Clean the project
-  - ./gradlew --no-daemon clean
-  - rm -rf build
-  - rm -rf app/.externalNativeBuild
-
-  # Remove git files
-  - find . -name .git | xargs rm -rf
-  - find . -name .gitmodules | xargs rm -rf
-  - find . -name .gitignore | xargs rm -rf
-  - find . -name .gitattributes | xargs rm -rf
-
-  # Copy content of OpenCV  into the project directory
-  - mkdir -p OpenCV-android-sdk
-  - cp -a $OPENCV_ANDROID_SDK/. OpenCV-android-sdk/
-
-  # Remove unused directories from OpenCV
-  - rm -rf OpenCV-android-sdk/apk OpenCV-android-sdk/samples
-
-  # Hardcode paths to OpenCV using relative paths
-  - sed -i app/src/main/cpp/Android.mk -e "s/\$(OPENCV_ANDROID_SDK)/\$(LOCAL_PATH)\/..\/..\/..\/..\/OpenCV-android-sdk/"
-  - sed -i app/src/main/cpp/Android.mk -e "/ifndef OPENCV_ANDROID_SDK/,+2d"
-  - sed -i settings.gradle -e "s/System.getenv('OPENCV_ANDROID_SDK')/'OpenCV-android-sdk'/"
-
-  # Zip the directory
-  - cd ../
-  - mv FaceRecognitionApp "FaceRecognitionApp-$TRAVIS_TAG"
-  - zip -rq "FaceRecognitionApp-$TRAVIS_TAG.zip" "FaceAttend-$TRAVIS_TAG"
-  - APP_ZIP=$(pwd)/"FaceApp-$TRAVIS_TAG.zip"
-
-deploy:
-  provider: releases
-  api_key:
-    secure: AS5TYcwjqZes1JKqQTryPifgijqJd8H2lowmOWDPSwc17DYFWrU58TR2yn1KYFMQ0dzBse7q6W4Pa43UFl0vsNQaOzKiEg93NSZowXZx+uOF2nlfayFFxfGqVaKKyNpsV1Tmp+Q0eUK5XxBxJ5aSBgJ0II0lyjDaeNJ86x8mvxWoznRy4Ra9COiKnO5kRjwIoCbQFZcf9We4TuSzVnnAIKMeX1rYyczx099FWayIVgT1WSZYZ5r60iU2MZbpkP1/MAcZEOy9OhdQQYm4RYaVq2gmIgGqRKnQ6i9hJXHyNH/u8S3YOrK9SA6XSLN66KCnK4Sk/LtIIrw7ZVkgyHrgmp+hA4JiBuAGIlvDoMJHg8P1EWj2JeVh63NXJSFYvHgRqNpan+9Z+QISi+cAeejbQEumTLA3QJgdgCN22n6hgLWtPWLe4MDVZmWfhIZNZjQZC0C9w3Zi0fwJlf2fC2lQ2tthUBdX3CsM4Ct2Ev2Y+gWo0A4ykcgm0irv81BX6Pd9WAGNnT35+68xv5IU+K0RNT8XJD1aekVY7n7Z3I8f8n99OnFwP6k2T+4rseaY2pQT4aAmsLRKWtm5oKhPFW5hxjzd8REunohUZz81QdvDdCB6wm/knqIqy+A4kzoKkF2CrQxWGM4/hD0/Cnk5oGZSNNJYbfsb4SpBWwl7NiG1GzM=
-  file: "$APP_ZIP"
-  skip_cleanup: true
-  on:
-    tags: true
+    # Specify at least one system image,
+    # if you need to run emulator(s) during your tests
+    - sys-img-x86-android-26
+    - sys-img-armeabi-v7a-android-17
