@@ -57,8 +57,7 @@ before_script:
   - export ANDROID_NDK_HOME=$(dirname $HOME/android-ndk/android-ndk-*/ndk-build)
   - export OPENCV_ANDROID_SDK=$HOME/opencv-sdk/OpenCV-android-sdk
 
-  # Apply patch to OpenCV
-  - patch -d$OPENCV_ANDROID_SDK/../ -p0 < opencv.patch
+
 
 script:
   - ./gradlew --no-daemon build
