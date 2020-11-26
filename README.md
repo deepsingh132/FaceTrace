@@ -33,4 +33,3 @@ First clone the repository including the submodule:
 git clone https://github.com/deepsingh132/FaceAttend
 ```
 
-If you have already cloned the project, then please run the following command in order to initialize the submodule:
