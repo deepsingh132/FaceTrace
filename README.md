@@ -1,4 +1,4 @@
-# FaceAttend
+# FaceTrace
 ### Face Recognition Attendance Based Android App
 
 
@@ -21,7 +21,7 @@ The library uses other projects such as [FaceRecognitionLib](https://github.com/
 
 In order to build this project you need to download and install [Android Studio](http://developer.android.com/sdk/index.html). You will then need to install the [Android NDK](https://developer.android.com/studio/projects/add-native-code.html#download-ndk).
 
-Then simply download the latest release: <https://github.com/deepsingh132/FaceAttend/releases/download/1.1.0/FaceAttend-1.1.0.zip> and open the project in Android Studio.
+Then simply download the latest release: <https://github.com/deepsingh132/FaceTrace/releases/download/1.1.0/FaceTrace-1.1.0.zip> and open the project in Android Studio.
 
 ## Advanced build instructions
 
