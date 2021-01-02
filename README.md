@@ -2,6 +2,7 @@
 ### Face Recognition Attendance Based Android App
 
 
+[![DeepSource](https://deepsource.io/gh/deepsingh132/FaceTrace.svg/?label=active+issues&show_trend=true)](https://deepsource.io/gh/deepsingh132/FaceTrace/?ref=repository-badge)
 
 #### Developed by Mandeep Singh, 2020
 
