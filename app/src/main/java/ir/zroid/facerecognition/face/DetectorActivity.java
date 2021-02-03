@@ -31,6 +31,7 @@ import android.graphics.Typeface;
 import android.hardware.camera2.CameraCharacteristics;
 import android.inputmethodservice.Keyboard;
 import android.media.ImageReader.OnImageAvailableListener;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -56,6 +57,9 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.face.Face;
 import com.google.mlkit.vision.face.FaceDetection;
@@ -323,6 +327,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
             workbook.write(out);
             out.write(bytes.toByteArray());
             Toast.makeText(DetectorActivity.this,"Done ! File Saved to: " + f.getAbsolutePath(),Toast.LENGTH_LONG).show();
+            uploadFile(f,fileSuffix);
             out.close();
           } catch (IOException e){
             e.printStackTrace();
@@ -353,12 +358,27 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     });
     builder.create().show();
   }
-  private static void createList(ArrayList<String> arrayList,Row row){
 
-    for (int i = 0; i < arrayList.size(); i++) {
-      Cell cell = row.createCell(i);
-      cell.setCellValue(arrayList.get(i));
-    }
+  private void uploadFile(File file,String time){
+    Uri f = Uri.fromFile(file);
+    FirebaseStorage storage = FirebaseStorage.getInstance();
+    StorageReference reference = storage.getReferenceFromUrl("gs://facetrace132.appspot.com");
+    StorageReference storageReference = reference.child("Attendance" + time.trim() + ".xlsx");
+
+    UploadTask task  = storageReference.putFile(f);
+    task.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+      @Override
+      public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+        Log.w(String.valueOf(task.getResult()),"Uploaded to Database !");
+        Toast.makeText(DetectorActivity.this,"Uploaded to Database !",Toast.LENGTH_SHORT).show();
+      }
+    }).addOnFailureListener(new OnFailureListener() {
+      @Override
+      public void onFailure(@NonNull Exception e) {
+        Log.e(String.valueOf(task.getException()),"Failed to Upload to Database !");
+        Toast.makeText(DetectorActivity.this,"Upload to Database Failed !",Toast.LENGTH_SHORT).show();
+      }
+    });
 
   }
 

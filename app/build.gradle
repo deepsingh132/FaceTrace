@@ -74,6 +74,7 @@ dependencies {
     implementation files('src\\main\\assets\\zip4j_1.3.2.jar')
     implementation 'com.google.firebase:firebase-database:19.6.0'
     implementation files('build\\libs\\poishadow-all.jar')
+    implementation 'com.google.firebase:firebase-storage:19.2.1'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
