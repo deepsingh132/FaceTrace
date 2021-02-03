@@ -16,6 +16,8 @@
 
 package ir.zroid.facerecognition.face;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -27,8 +29,10 @@ import android.graphics.Paint.Style;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.hardware.camera2.CameraCharacteristics;
+import android.inputmethodservice.Keyboard;
 import android.media.ImageReader.OnImageAvailableListener;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
@@ -39,25 +43,43 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.dialog.MaterialDialogs;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.face.Face;
 import com.google.mlkit.vision.face.FaceDetection;
 import com.google.mlkit.vision.face.FaceDetector;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 import ir.zroid.facerecognition.MainActivity;
 import ir.zroid.facerecognition.R;
+import ir.zroid.facerecognition.database.MyDatabase;
 import ir.zroid.facerecognition.face.adapters.DetectedAdapter;
 import ir.zroid.facerecognition.face.customview.OverlayView;
 import ir.zroid.facerecognition.face.customview.OverlayView.DrawCallback;
@@ -77,6 +99,9 @@ import ir.zroid.facerecognition.studentlist.StudentListActivity;
  */
 public class DetectorActivity extends CameraActivity implements OnImageAvailableListener {
   public static final Logger LOGGER = new Logger();
+  public static ArrayList<String> studentNames = new ArrayList<String>();
+  private static final String path = "/Attendance";
+  ArrayList<String> studentUids = new ArrayList<String>();
 
 
   // FaceNet
@@ -99,6 +124,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
   private static final boolean MAINTAIN_ASPECT = false;
 
   private static final Size DESIRED_PREVIEW_SIZE = new Size(640, 480);
+  public boolean flag = false;
   //private static final int CROP_SIZE = 320;
   //private static final Size CROP_SIZE = new Size(320, 320);
 
@@ -121,6 +147,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
   private long timestamp = 0;
   public static String Uid = "";
+  private MyDatabase db;
 
   private Matrix frameToCropTransform;
   private Matrix cropToFrameTransform;
@@ -170,7 +197,19 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
     getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     getSupportActionBar().setHomeButtonEnabled(true);
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
+    this.db = new MyDatabase(getApplicationContext());
 
+    SimpleDateFormat s = new SimpleDateFormat("dd:MM:yyyy:hh:mm");
+    String format = s.format(new Date());
+    DatabaseReference reference = database.getReference("Attendance");
+
+    System.setProperty("org.apache.poi.javax.xml.stream.XMLInputFactory", "com.fasterxml.aalto.stax.InputFactoryImpl");
+    System.setProperty("org.apache.poi.javax.xml.stream.XMLOutputFactory", "com.fasterxml.aalto.stax.OutputFactoryImpl");
+    System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory", "com.fasterxml.aalto.stax.EventFactoryImpl");
+
+
+    
 
     fabAdd = findViewById(R.id.fab_add);
     rec = findViewById(R.id.rec_detected);
@@ -186,11 +225,11 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     studentAddList.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        startActivity(new Intent(DetectorActivity.this, StudentListActivity.class));
-        //finish();
-        //startActivity(new Intent(DetectorActivity.this, DetectorActivity.class));
+        generate();
       }
     });
+
+
 
     // Real-time contour detection of multiple faces
     FaceDetectorOptions options =
@@ -204,6 +243,122 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     FaceDetector detector = FaceDetection.getClient(options);
 
     MainActivity.faceDetector = detector;
+
+  }
+
+  private void generate(){
+    //flag=true;
+    Toast.makeText(
+            getApplicationContext(),
+            Uid+ " Added to list",
+            Toast.LENGTH_SHORT).show();
+
+    //final CharSequence[] items = studentUids.;
+    AlertDialog.Builder builder = new AlertDialog.Builder(DetectorActivity.this);
+    builder.setTitle("Student Uid's");
+    builder.setItems(studentUids.toArray(new String[0]), new DialogInterface.OnClickListener() {
+      @Override
+      public void onClick(DialogInterface dialogInterface, int i) {
+
+      }
+    });
+    builder.setPositiveButton("Upload", new DialogInterface.OnClickListener() {
+      @Override
+      public void onClick(DialogInterface dialogInterface, int i) {
+
+        try {
+          XSSFWorkbook workbook = new XSSFWorkbook();
+          XSSFSheet sheet = workbook.createSheet("attendance");
+          //int rownum = 0;
+
+          Row rowId = sheet.createRow(0);
+          rowId.createCell(0).setCellValue("Name");
+
+          rowId.createCell(1).setCellValue("Uid");
+
+          int count=1;
+          String rowval="";
+
+
+          for(int k=0; k< studentUids.size(); k++){
+            Row row = sheet.createRow(count);
+            rowval = String.valueOf(sheet.getRow(k));
+            Log.e("Row Value: ",rowval);
+            row.createCell(1).setCellValue(studentUids.get(k));
+            row.createCell(0).setCellValue(studentNames.get(k));
+            count++;
+            //createList(studentUids,row);
+          }
+
+
+
+
+          /*for (int j=0; j< studentNames.size(); j++) {
+            Row rowCol = sheet.createRow(countName);
+            rowval = String.valueOf(sheet.getRow(j));
+            Log.e("Row Value: ",rowval);
+            rowCol.createCell(2).setCellValue(studentNames.get(j));
+            countName++;
+          }*/
+
+          for (int l = 0; l < studentNames.size(); l++) {
+            Log.e("Names: ", studentNames.get(l));
+          }
+
+
+
+
+
+          File file = new File(Environment.getExternalStorageDirectory() + path);
+          if (!file.exists()){
+            //Log.d("dir:" , file.mkdirs());
+            file.mkdirs();
+          }
+          try {
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            String fileSuffix = new SimpleDateFormat("yyyyMMddHHmm").format(new Date());
+            File f = new File(file,"Attendance"+ fileSuffix.trim() + ".xlsx");
+            f.createNewFile();
+            FileOutputStream out = new FileOutputStream(f);
+            workbook.write(out);
+            out.write(bytes.toByteArray());
+            Toast.makeText(DetectorActivity.this,"Done ! File Saved to: " + f.getAbsolutePath(),Toast.LENGTH_LONG).show();
+            out.close();
+          } catch (IOException e){
+            e.printStackTrace();
+          }
+
+
+        }
+        catch (Exception e){
+          e.printStackTrace();
+        }
+
+        //Upload uids to db
+        /*for (String uid: studentUids) {
+          reference.child(format).setValue(studentUids.toString()).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+              Toast.makeText(DetectorActivity.this,"Uploaded !",Toast.LENGTH_LONG).show();
+            }
+          }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+              Toast.makeText(DetectorActivity.this,"Upload Failed !",Toast.LENGTH_LONG).show();
+            }
+          });
+        }*/
+
+      }
+    });
+    builder.create().show();
+  }
+  private static void createList(ArrayList<String> arrayList,Row row){
+
+    for (int i = 0; i < arrayList.size(); i++) {
+      Cell cell = row.createCell(i);
+      cell.setCellValue(arrayList.get(i));
+    }
 
   }
 
@@ -600,102 +755,138 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         //SimilarityClassifier.Recognition recognition= new SimilarityClassifier.Recognition()
 
         Log.e("LabelDetected", label);
-        if (!label.isEmpty()){
+        if (!label.isEmpty()) {
           listToLoad.add(label);
+
+          if (!studentUids.contains(label)){
+            studentUids.add(label);
+            String search = "WHERE codeMeli IN ('" + label + "')";
+            String no = MainActivity.db.getString(query + " " + search, "id");  //getListOfRow(query + " " + search, "id")
+            studentNames.add(db.getString(
+                    "SELECT * FROM persons WHERE id = '"
+                            + no +
+                            "'", "firstName") +
+                    " " + db.getString(
+                            "SELECT * FROM persons WHERE id = '"
+                                    + no
+                                    + "'", "lastName"));
+            Log.e("SearchLabel:",search);
+            Log.e("Label No:",no);
+
+          }
+
+          //generateXL(listToLoad);
           Uid = label;
+
+
+          result.setColor(color);
+          result.setLocation(boundingBox);
+          result.setExtra(extra);
+          result.setCrop(crop);
+          mappedRecognitions.add(result);
+
         }
 
 
-
-
-
-        result.setColor(color);
-        result.setLocation(boundingBox);
-        result.setExtra(extra);
-        result.setCrop(crop);
-        mappedRecognitions.add(result);
-
       }
 
-
-    }
-
-    updateResults(currTimestamp, mappedRecognitions);
+      updateResults(currTimestamp, mappedRecognitions);
 
 
-
-
-   // if (!scanned){
-    String text = "";
-    for (int i = 0; i < listToLoad.size(); i++) {
-      if (i == 0){
-        text = listToLoad.get(i);
-      } else {
-        text = text + "," + listToLoad.get(i);
-      }
-    }
-    String search = "WHERE codeMeli IN ('" + text + "')";
-
-    Log.e("SearchText", search);
-      initRecyclerView(listToLoad);
-    //}
-
-  }
-
-
-  public void initRecyclerView(ArrayList<String> listToLoad) {
-    //scanned = true;
-
-    runOnUiThread(new Runnable() {
-      @Override
-      public void run() {
-
+     // if (!scanned) {
         String text = "";
         for (int i = 0; i < listToLoad.size(); i++) {
-          if (i == 0){
-            text = listToLoad.get(i); // 1299
+          if (i == 0) {
+            text = listToLoad.get(i);
           } else {
-            text = text + "," + listToLoad.get(i); //1299 , 1177
+            text = text + "," + listToLoad.get(i);
           }
         }
         String search = "WHERE codeMeli IN ('" + text + "')";
 
         Log.e("SearchText", search);
+      for (int i = 0; i < studentUids.size(); i++) {
+        Log.e("Uids: ",studentUids.get(i));
+        Log.e("Names: ",studentNames.get(i));
+      }
+
+        initRecyclerView(search);
+
+     // }
+    }
+  }
+
+  /*public void generateXL(ArrayList<String> studentUids){
+    Workbook workbook = new XSSFWorkbook();
+    Sheet sheet = workbook.createSheet("Students"); //Creating a sheet
+
+    for(int  i=0; i<listToLoad.size(); i++){
+
+      Row row = sheet.createRow(i);
+      row.createCell(CELL_INDEX_0).setCellValue(VALUE_YOU_WANT_TO_KEEP_ON_1ST_COLUMN);
+      row.createCell(CELL_INDEX_1).setCellValue(VALUE_YOU_WANT_TO_KEEP_ON_2ND_COLUMN);
+    }
+
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.US);
+    Date now = new Date();
 
 
+    String fileName = "studentAttendance:" + formatter.format(now) +  ".xlsx"; //Name of the file
 
+    String extStorageDirectory = Environment.getExternalStorageDirectory()
+            .toString();
+    File folder = new File(extStorageDirectory, "Attendance");// Name of the folder you want to keep your file in the local storage.
+    folder.mkdir(); //creating the folder
+    File file = new File(folder, fileName);
+    try {
+      file.createNewFile(); // creating the file inside the folder
+    } catch (IOException e1) {
+      e1.printStackTrace();
+    }
+
+    try {
+      FileOutputStream fileOut = new FileOutputStream(file); //Opening the file
+      workbook.write(fileOut); //Writing all your row column inside the file
+      fileOut.close(); //closing the file and done
+
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }*/
+
+
+  public void initRecyclerView(String searchQuery) {
+    scanned = true;
+
+    runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
         LinearLayoutManager llm = new LinearLayoutManager(DetectorActivity.this, LinearLayoutManager.HORIZONTAL, false);
         rec.setLayoutManager(llm);
-        detectedAdapter = new DetectedAdapter(DetectorActivity.this, MainActivity.db.getListOfRow(query + " " + search, "id"));
+        detectedAdapter = new DetectedAdapter(DetectorActivity.this, MainActivity.db.getListOfRow(query + " " + searchQuery, "id"));
         rec.setAdapter(detectedAdapter);
-        detectedAdapter.notifyDataSetChanged();
+
 
         new Handler().postDelayed(new Runnable() {
           @Override
           public void run() {
-            detectedAdapter.notifyDataSetChanged();
             rec.setVisibility(View.VISIBLE);
             studentAddList.setVisibility(View.VISIBLE);
-            //rec.setVisibility(View.GONE);
           }
         }, 300);
 
-
-       /* String name= Uid +" Added To List";
-        if(!Uid.isEmpty()) {
-          Toast toast = Toast.makeText(getApplicationContext(), name, Toast.LENGTH_LONG);
-          toast.show();
-        }*/
-      /*  new Handler().postDelayed(new Runnable() {
+        new Handler().postDelayed(new Runnable() {
           @Override
           public void run() {
-            scanned = false;
+              scanned = false;
           }
-        }, 3000);*/
+        }, 3000);
       }
     });
 
   }
 
 
-}
+  }

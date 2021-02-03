@@ -3,6 +3,7 @@ package ir.zroid.facerecognition.face.adapters;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,6 +53,7 @@ public class DetectedAdapter extends RecyclerView.Adapter<DetectedAdapter.MyView
         String codeMeli = db.getString("SELECT * FROM persons WHERE id = '" + items.get(position) + "'", "codeMeli");
 
         holder.tv_firstName.setText(db.getString("SELECT * FROM persons WHERE id = '" + items.get(position) + "'", "firstName") + " " + db.getString("SELECT * FROM persons WHERE id = '" + items.get(position) + "'", "lastName"));
+        Log.e("label: ",items.get(position));
         holder.tv_reason.setText(codeMeli);
         //holder.studentname.setText(db.getString("SELECT * FROM persons WHERE id = '" + items.get(position) + "'", "firstName") + " " + db.getString("SELECT * FROM persons WHERE id = '" + items.get(position) + "'", "lastName"));
         //holder.studentUid.setText(codeMeli);

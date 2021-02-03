@@ -24,10 +24,13 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:fullBackupContent="true"
         android:requestLegacyExternalStorage="true"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".studentlist.StudentListActivity">
+        <activity android:name=".studentlist.StudentListActivity"
+            android:launchMode="singleInstance"
+            >
 
         </activity>
         <activity android:name=".activities.EditPersonActivity" />

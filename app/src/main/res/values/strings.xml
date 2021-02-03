@@ -14,7 +14,7 @@
  limitations under the License.
 -->
 <resources>
-    <string name="app_name">FaceAttend</string>
+    <string name="app_name">FaceTrace</string>
     <string name="training">Training</string>
     <string name="title_activity_fullscreen">FullscreenActivity</string>
     <!-- TODO: Remove or change this placeholder text -->

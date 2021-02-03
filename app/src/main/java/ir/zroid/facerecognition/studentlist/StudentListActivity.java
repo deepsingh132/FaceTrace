@@ -58,6 +58,9 @@ public class StudentListActivity extends AppCompatActivity {
             SimilarityClassifier.Recognition result = MainActivity.resultsAux.get(0);
 
             extra = result.getExtra();
+
+            listToLoad = (ArrayList<String>) getIntent().getSerializableExtra("key");
+
 //          Object extra = result.getExtra();
             if (extra != null) {
                 //LOGGER.e("embeeding retrieved " + extra.toString());
@@ -79,32 +82,33 @@ public class StudentListActivity extends AppCompatActivity {
             listToLoad.add(label);
             Toast toast =
                     Toast.makeText(
-                            getApplicationContext(), label, Toast.LENGTH_LONG);
+                            getApplicationContext(), name, Toast.LENGTH_LONG);
             toast.show();
         }
             String text = "";
             for (int i = 0; i < listToLoad.size(); i++) {
                 if (i == 0){
                     text = listToLoad.get(i);
-                    Log.d("Text @ StudentListActivity:85",text);
                 } else {
-                    Log.d("Text @ StudentListActivity:85",text);
-                    text = text + "," + listToLoad.get(i);
                 }
             }
             String search = "WHERE codeMeli IN ('" + text + "')";
 
             Log.e("SearchText", search);
 
+        for (int i = 0; i < listToLoad.size(); i++) {
+            Log.e("List: ",listToLoad.get(i));
+        }
 
 
 
-        LinearLayoutManager llm = new LinearLayoutManager(StudentListActivity.this, LinearLayoutManager.VERTICAL, false);
-        studentListrec.setLayoutManager(llm);
-        detectedAdapter = new StudentListAdapter(StudentListActivity.this, MainActivity.db.getListOfRow(query + " " + search, "id"));
-        studentListrec.setAdapter(detectedStudents);
 
-           /// initRecyclerView(search);
+        //LinearLayoutManager llm = new LinearLayoutManager(StudentListActivity.this, LinearLayoutManager.VERTICAL, false);
+        //studentListrec.setLayoutManager(llm);
+        //detectedAdapter = new StudentListAdapter(StudentListActivity.this, MainActivity.db.getListOfRow(query + " " + search, "id"));
+        //studentListrec.setAdapter(detectedStudents);
+
+            initRecyclerView(search);
 
 
 
@@ -115,12 +119,9 @@ public class StudentListActivity extends AppCompatActivity {
         //Put Backend Code here for Getting Student list and uploading to firebase db
     }
 
-    public void initRecyclerView(ArrayList<String> listToLoad) {
+    public void initRecyclerView(String search) {
         //scanned = true;
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
+        studentListrec.setVisibility(View.VISIBLE);
 
                 String text = "";
                 for (int i = 0; i < listToLoad.size(); i++) {
@@ -130,28 +131,24 @@ public class StudentListActivity extends AppCompatActivity {
                         text = text + "," + listToLoad.get(i);
                     }
                 }
-                String search = "WHERE codeMeli IN ('" + text + "')";
 
-                Log.e("SearchText", search);
+               // int i=0;
+                //for (i=0;i<DetectorActivity.studentUids.size(); i++){
+                    //studentListrec.setVisibility(View.VISIBLE);
+                    //String search = "WHERE codeMeli IN ('" + text + "')";
+
+                    Log.e("SearchText", search);
 
 
 
-                LinearLayoutManager llm = new LinearLayoutManager(StudentListActivity.this, LinearLayoutManager.VERTICAL, false);
-                studentListrec.setLayoutManager(llm);
-                detectedAdapter = new StudentListAdapter(StudentListActivity.this, MainActivity.db.getListOfRow(query + " " + search, "id"));
-                studentListrec.setAdapter(detectedAdapter);
+                    LinearLayoutManager llm = new LinearLayoutManager(StudentListActivity.this, LinearLayoutManager.HORIZONTAL, false);
+                    studentListrec.setLayoutManager(llm);
+                    detectedStudents = new DetectedAdapter(StudentListActivity.this, MainActivity.db.getListOfRow(query + " " + search, "id"));
+                    studentListrec.setAdapter(detectedStudents);
 
-                detectedAdapter.notifyDataSetChanged();
+                //    detectedAdapter.notifyDataSetChanged();
+                //}
 
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        //studentListrec.setVisibility(View.VISIBLE);
-                        //rec.setVisibility(View.VISIBLE);
-                        //studentAddList.setVisibility(View.VISIBLE);
-                        //rec.setVisibility(View.GONE);
-                    }
-                }, 300);
 
 
        /* String name= Uid +" Added To List";
@@ -165,8 +162,7 @@ public class StudentListActivity extends AppCompatActivity {
             scanned = false;
           }
         }, 3000);*/
-            }
-        });
+
 
     }
 

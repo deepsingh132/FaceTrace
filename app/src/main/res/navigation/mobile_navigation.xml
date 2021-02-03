@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/navigation_home"
         android:name="ir.zroid.facerecognition.ui.home.HomeFragment"
-        android:label="Recognition"
+        android:label="FaceTrace"
         tools:layout="@layout/fragment_home" >
     </fragment>
 

@@ -40,7 +40,7 @@ public class StudentListAdapter extends RecyclerView.Adapter<StudentListAdapter.
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
        // View v = inflater.inflate(R.layout.item_persons, parent, false);
-        View view = inflater.inflate(R.layout.item_persons, parent, false);
+        View view = inflater.inflate(R.layout.studentitem, parent, false);
         //MyViewHolder VH = new MyViewHolder(v);
         MyViewHolder viewHolder = new MyViewHolder(view);
         //return viewHolder;
@@ -84,8 +84,8 @@ public class StudentListAdapter extends RecyclerView.Adapter<StudentListAdapter.
         public MyViewHolder(View itemView) {
             super(itemView);
             //tv_firstName = (TextView) itemView.findViewById(R.id.tv_firstName);
-            studentname = (TextView) itemView.findViewById(R.id.studentName);
-            studentUid = (TextView) itemView.findViewById(R.id.studentUID);
+            studentname = itemView.findViewById(R.id.studentName);
+            studentUid = itemView.findViewById(R.id.studentUID);
             //img_person = (CircleImageView) itemView.findViewById(R.id.img_person);
             student_imageview = (CircleImageView) itemView.findViewById(R.id.studentImg);
             //tv_reason = (TextView) itemView.findViewById(R.id.tv_reason);
